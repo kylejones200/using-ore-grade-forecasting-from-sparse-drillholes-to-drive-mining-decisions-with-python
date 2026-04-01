@@ -11,13 +11,6 @@ from sklearn.gaussian_process.kernels import RBF, WhiteKernel, ConstantKernel
 from scipy.spatial.distance import cdist
 from sklearn.model_selection import cross_val_score, cross_val_predict
 
-# Import Tufte plotting utilities
-import sys
-from pathlib import Path
-sys.path.insert(0, str(Path(__file__).parent.parent))
-from tda_utils import setup_tufte_plot, TufteColors
-
-
 def generate_synthetic_drillhole_data(num_holes=100, domain_size=1000, seed=42):
     """Generate realistic synthetic drillhole assay data."""
     np.random.seed(seed)

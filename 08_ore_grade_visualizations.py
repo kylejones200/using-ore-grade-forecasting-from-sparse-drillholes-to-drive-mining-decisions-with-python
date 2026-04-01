@@ -28,13 +28,6 @@ import os
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 from plot_style import set_tufte_defaults, apply_tufte_style, save_tufte_figure, COLORS
 
-# Import Tufte plotting utilities
-import sys
-from pathlib import Path
-sys.path.insert(0, str(Path(__file__).parent.parent))
-from tda_utils import setup_tufte_plot, TufteColors
-
-
 
 def save_fig(filename):
     """Save plot in the standard minimalist format."""
@@ -160,6 +153,8 @@ def create_main_visualization():
     ax1.spines["right"].set_visible(False)
     ax1.spines["left"].set_position(("outward", 5))
     ax1.spines["bottom"].set_position(("outward", 5))
+    ax1.grid(False)
+    
     ax1.set_title('Drillhole Spatial Distribution', fontsize=12, fontweight="bold", loc="left")
     ax1.set_xlabel('Easting (m)', fontsize=10)
     ax1.set_ylabel('Northing (m)', fontsize=10)
@@ -206,6 +201,8 @@ def create_main_visualization():
     ax2.spines["right"].set_visible(False)
     ax2.spines["left"].set_position(("outward", 5))
     ax2.spines["bottom"].set_position(("outward", 5))
+    ax2.grid(False)
+    
     ax2.set_title('Experimental Variogram', fontsize=12, fontweight="bold", loc="left")
     ax2.set_xlabel('Separation Distance (m)', fontsize=10)
     ax2.set_ylabel('Semivariance', fontsize=10)
@@ -235,6 +232,8 @@ def create_main_visualization():
     ax3.spines["right"].set_visible(False)
     ax3.spines["left"].set_position(("outward", 5))
     ax3.spines["bottom"].set_position(("outward", 5))
+    ax3.grid(False)
+    
     ax3.set_title('Grade Distribution', fontsize=12, fontweight="bold", loc="left")
     ax3.set_xlabel('Au Grade (ppm)', fontsize=10)
     ax3.set_ylabel('Frequency', fontsize=10)
@@ -285,6 +284,8 @@ def create_accuracy_visualization():
     ax1.spines["right"].set_visible(False)
     ax1.spines["left"].set_position(("outward", 5))
     ax1.spines["bottom"].set_position(("outward", 5))
+    ax1.grid(False)
+    
     ax1.set_title('Cross-Validation: Actual vs Predicted Grades', 
                   fontsize=12, fontweight="bold", loc="left")
     ax1.set_xlabel('Actual Grade (ppm)', fontsize=10)
@@ -321,6 +322,8 @@ def create_accuracy_visualization():
     ax2.spines["right"].set_visible(False)
     ax2.spines["left"].set_position(("outward", 5))
     ax2.spines["bottom"].set_position(("outward", 5))
+    ax2.grid(False)
+    
     ax2.set_title('Prediction Residuals Distribution', 
                   fontsize=12, fontweight="bold", loc="left")
     ax2.set_xlabel('Residual (Actual - Predicted, ppm)', fontsize=10)
