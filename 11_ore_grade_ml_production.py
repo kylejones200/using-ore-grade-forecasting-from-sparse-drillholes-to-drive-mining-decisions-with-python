@@ -22,6 +22,12 @@ from skgstat import Variogram
 from pykrige.ok import OrdinaryKriging
 from scipy.spatial import cKDTree
 
+import logging
+logging.basicConfig(
+    level=logging.INFO,
+    format='%(asctime)s - %(levelname)s - %(message)s'
+)
+logger = logging.getLogger(__name__)
 # Import Tufte plotting utilities
 import sys
 from pathlib import Path
@@ -129,10 +135,10 @@ def prepare_spatial_features(df, target_crs="EPSG:32750"):
     gdf["x"] = gdf.geometry.x / 1000  # Convert to km for numerical stability
     gdf["y"] = gdf.geometry.y / 1000
     
-    print(f"Prepared {len(gdf)} samples")
-    print(f"Au range: {gdf['Au'].min():.3f} - {gdf['Au'].max():.3f} ppm")
-    print(f"Mean Au: {gdf['Au'].mean():.3f} ppm")
-    print(f"Spatial extent: {gdf['x'].max() - gdf['x'].min():.1f} km × {gdf['y'].max() - gdf['y'].min():.1f} km")
+    logger.info(f"Prepared {len(gdf)} samples")
+    logger.info(f"Au range: {gdf['Au'].min():.3f} - {gdf['Au'].max():.3f} ppm")
+    logger.info(f"Mean Au: {gdf['Au'].mean():.3f} ppm")
+    logger.info(f"Spatial extent: {gdf['x'].max() - gdf['x'].min():.1f} km × {gdf['y'].max() - gdf['y'].min():.1f} km")
     
     return gdf
 
@@ -144,10 +150,10 @@ def create_spatial_folds(gdf, n_folds=5):
     """
     groups = pd.qcut(gdf["x"], n_folds, labels=False, duplicates='drop')
     
-    print(f"\nCreated {n_folds} spatial folds:")
+    logger.info(f"\nCreated {n_folds} spatial folds:")
     for fold in range(n_folds):
         n = (groups == fold).sum()
-        print(f"  Fold {fold}: {n} samples")
+        logger.info(f"  Fold {fold}: {n} samples")
     
     return groups
 
@@ -170,12 +176,12 @@ def fit_variogram(gdf, plot=False):
         n_lags=25
     )
     
-    print("\nVariogram Parameters:")
-    print(f"  Model: {V.model.__name__}")
-    print(f"  Sill: {V.sill:.3f}")
-    print(f"  Range: {V.range:.1f} km")
-    print(f"  Nugget: {V.nugget:.3f}")
-    print(f"  Nugget/Sill ratio: {V.nugget/V.sill:.2%}")
+    logger.info("\nVariogram Parameters:")
+    logger.info(f"  Model: {V.model.__name__}")
+    logger.info(f"  Sill: {V.sill:.3f}")
+    logger.info(f"  Range: {V.range:.1f} km")
+    logger.info(f"  Nugget: {V.nugget:.3f}")
+    logger.info(f"  Nugget/Sill ratio: {V.nugget/V.sill:.2%}")
     
     return V
 
@@ -206,10 +212,10 @@ def ordinary_kriging_predict(gdf, grid_resolution=100):
     # Convert back to ppm
     z_ppm = np.expm1(z)
     
-    print("\nOrdinary Kriging Results:")
-    print(f"  Grid size: {grid_resolution} × {grid_resolution}")
-    print(f"  Predicted Au range: {z_ppm.min():.3f} - {z_ppm.max():.3f} ppm")
-    print(f"  Mean kriging variance: {ss.mean():.3f}")
+    logger.info("\nOrdinary Kriging Results:")
+    logger.info(f"  Grid size: {grid_resolution} × {grid_resolution}")
+    logger.info(f"  Predicted Au range: {z_ppm.min():.3f} - {z_ppm.max():.3f} ppm")
+    logger.info(f"  Mean kriging variance: {ss.mean():.3f}")
     
     return gx, gy, z_ppm, ss
 
@@ -261,7 +267,7 @@ def train_gaussian_process(gdf, groups):
     pred_mu = np.zeros_like(y)
     pred_std = np.zeros_like(y)
     
-    print("\nGaussian Process Cross-Validation:")
+    logger.info("\nGaussian Process Cross-Validation:")
     gkf = GroupKFold(n_splits=5)
     
     for fold_idx, (train_idx, test_idx) in enumerate(gkf.split(X, y, groups)):
@@ -281,7 +287,7 @@ def train_gaussian_process(gdf, groups):
         # Fold metrics
         fold_mae = mean_absolute_error(y_test, mu)
         fold_rmse = np.sqrt(mean_squared_error(y_test, mu))
-        print(f"  Fold {fold_idx}: MAE={fold_mae:.3f}, RMSE={fold_rmse:.3f}")
+        logger.info(f"  Fold {fold_idx}: MAE={fold_mae:.3f}, RMSE={fold_rmse:.3f}")
     
     # Overall metrics
     mae = mean_absolute_error(y, pred_mu)
@@ -291,11 +297,11 @@ def train_gaussian_process(gdf, groups):
     z_scores = np.abs(y - pred_mu) / np.maximum(pred_std, 1e-6)
     coverage_95 = (z_scores < 1.96).mean()
     
-    print(f"\nGPR Overall Performance:")
-    print(f"  MAE: {mae:.3f} log(ppm)")
-    print(f"  RMSE: {rmse:.3f} log(ppm)")
-    print(f"  95% Confidence Coverage: {coverage_95:.1%}")
-    print(f"  Mean Prediction Std: {pred_std.mean():.3f}")
+    logger.info(f"\nGPR Overall Performance:")
+    logger.info(f"  MAE: {mae:.3f} log(ppm)")
+    logger.info(f"  RMSE: {rmse:.3f} log(ppm)")
+    logger.info(f"  95% Confidence Coverage: {coverage_95:.1%}")
+    logger.info(f"  Mean Prediction Std: {pred_std.mean():.3f}")
     
     # Refit on full data for final predictions
     gp_pipeline.fit(X, y)
@@ -340,7 +346,7 @@ def train_xgboost(gdf, groups):
     
     pred = np.zeros_like(y)
     
-    print("\nXGBoost Cross-Validation:")
+    logger.info("\nXGBoost Cross-Validation:")
     gkf = GroupKFold(n_splits=5)
     
     for fold_idx, (train_idx, test_idx) in enumerate(gkf.split(X, y, groups)):
@@ -356,15 +362,15 @@ def train_xgboost(gdf, groups):
         # Fold metrics
         fold_mae = mean_absolute_error(y_test, pred[test_idx])
         fold_rmse = np.sqrt(mean_squared_error(y_test, pred[test_idx]))
-        print(f"  Fold {fold_idx}: MAE={fold_mae:.3f}, RMSE={fold_rmse:.3f}")
+        logger.info(f"  Fold {fold_idx}: MAE={fold_mae:.3f}, RMSE={fold_rmse:.3f}")
     
     # Overall metrics
     mae = mean_absolute_error(y, pred)
     rmse = np.sqrt(mean_squared_error(y, pred))
     
-    print(f"\nXGBoost Overall Performance:")
-    print(f"  MAE: {mae:.3f} log(ppm)")
-    print(f"  RMSE: {rmse:.3f} log(ppm)")
+    logger.info(f"\nXGBoost Overall Performance:")
+    logger.info(f"  MAE: {mae:.3f} log(ppm)")
+    logger.info(f"  RMSE: {rmse:.3f} log(ppm)")
     
     # Feature importance
     xgb_pipeline.fit(X, y)
@@ -379,10 +385,10 @@ def train_xgboost(gdf, groups):
     
     importances = xgb_pipeline.named_steps["xgb"].feature_importances_
     
-    print("\nTop Feature Importances:")
+    logger.info("\nTop Feature Importances:")
     for name, imp in sorted(zip(feature_names, importances), 
                            key=lambda x: x[1], reverse=True)[:5]:
-        print(f"  {name}: {imp:.3f}")
+        logger.info(f"  {name}: {imp:.3f}")
     
     return xgb_pipeline, pred, {"mae": mae, "rmse": rmse}
 
@@ -428,10 +434,10 @@ def create_prediction_grid(gdf, gp_model, xgb_model, resolution=150):
     # Ordinary Kriging (from earlier)
     gx_1d, gy_1d, ok_ppm, ok_var = ordinary_kriging_predict(gdf, grid_resolution=resolution)
     
-    print(f"\nGrid Predictions Complete:")
-    print(f"  GPR Au range: {gp_ppm.min():.3f} - {gp_ppm.max():.3f} ppm")
-    print(f"  XGB Au range: {xgb_ppm.min():.3f} - {xgb_ppm.max():.3f} ppm")
-    print(f"  OK Au range: {ok_ppm.min():.3f} - {ok_ppm.max():.3f} ppm")
+    logger.info(f"\nGrid Predictions Complete:")
+    logger.info(f"  GPR Au range: {gp_ppm.min():.3f} - {gp_ppm.max():.3f} ppm")
+    logger.info(f"  XGB Au range: {xgb_ppm.min():.3f} - {xgb_ppm.max():.3f} ppm")
+    logger.info(f"  OK Au range: {ok_ppm.min():.3f} - {ok_ppm.max():.3f} ppm")
     
     return {
         'grid_x': grid_x,
@@ -465,12 +471,12 @@ def analyze_uncertainty_calibration(y_true, y_pred, y_std, n_bins=10):
     
     calib_df = pd.DataFrame(calibration_data)
     
-    print("\nUncertainty Calibration:")
-    print(calib_df.to_string(index=False))
+    logger.info("\nUncertainty Calibration:")
+    logger.info(calib_df.to_string(index=False))
     
     # Ideal calibration: actual_rmse ≈ predicted_std
     correlation = np.corrcoef(calib_df['predicted_std'], calib_df['actual_rmse'])[0, 1]
-    print(f"\nCalibration Correlation: {correlation:.3f}")
+    logger.info(f"\nCalibration Correlation: {correlation:.3f}")
     
     return calib_df
 
@@ -478,38 +484,38 @@ def compare_methods(ok_metrics, gpr_metrics, xgb_metrics):
     """
     Comparative summary of all three methods.
     """
-    print("\n" + "="*70)
-    print("MODEL COMPARISON SUMMARY")
-    print("="*70)
+    logger.info("\n" + "="*70)
+    logger.info("MODEL COMPARISON SUMMARY")
+    logger.info("="*70)
     
-    print("\nAccuracy Metrics:")
-    print(f"  Ordinary Kriging:    MAE = N/A (no CV), RMSE = N/A")
-    print(f"  Gaussian Process:    MAE = {gpr_metrics['mae']:.3f}, RMSE = {gpr_metrics['rmse']:.3f}")
-    print(f"  XGBoost:             MAE = {xgb_metrics['mae']:.3f}, RMSE = {xgb_metrics['rmse']:.3f}")
+    logger.info("\nAccuracy Metrics:")
+    logger.info(f"  Ordinary Kriging:    MAE = N/A (no CV), RMSE = N/A")
+    logger.info(f"  Gaussian Process:    MAE = {gpr_metrics['mae']:.3f}, RMSE = {gpr_metrics['rmse']:.3f}")
+    logger.info(f"  XGBoost:             MAE = {xgb_metrics['mae']:.3f}, RMSE = {xgb_metrics['rmse']:.3f}")
     
-    print("\nUncertainty Quantification:")
-    print(f"  Ordinary Kriging:    Kriging variance (but often overconfident)")
-    print(f"  Gaussian Process:    95% Coverage = {gpr_metrics['coverage']:.1%} (well-calibrated)")
-    print(f"  XGBoost:             None (point estimates only)")
+    logger.info("\nUncertainty Quantification:")
+    logger.info(f"  Ordinary Kriging:    Kriging variance (but often overconfident)")
+    logger.info(f"  Gaussian Process:    95% Coverage = {gpr_metrics['coverage']:.1%} (well-calibrated)")
+    logger.info(f"  XGBoost:             None (point estimates only)")
     
-    print("\nComputational Efficiency:")
-    print(f"  Ordinary Kriging:    O(n³) - slow for large datasets")
-    print(f"  Gaussian Process:    O(n³) - same limitations")
-    print(f"  XGBoost:             O(n log n) - scales to millions of points")
+    logger.info("\nComputational Efficiency:")
+    logger.info(f"  Ordinary Kriging:    O(n³) - slow for large datasets")
+    logger.info(f"  Gaussian Process:    O(n³) - same limitations")
+    logger.info(f"  XGBoost:             O(n log n) - scales to millions of points")
     
-    print("\nBest Use Cases:")
-    print("  Ordinary Kriging:    Traditional geostatistics, spatial-only data")
-    print("  Gaussian Process:    When you need calibrated uncertainty + covariates")
-    print("  XGBoost:             Production forecasting with tight deadlines")
+    logger.info("\nBest Use Cases:")
+    logger.info("  Ordinary Kriging:    Traditional geostatistics, spatial-only data")
+    logger.info("  Gaussian Process:    When you need calibrated uncertainty + covariates")
+    logger.info("  XGBoost:             Production forecasting with tight deadlines")
     
-    print("="*70)
+    logger.info("="*70)
 
 def main():
     """Complete ore grade forecasting pipeline."""
-    print("="*70)
-    print("ORE GRADE FORECASTING WITH GEOCHEMISTRY AND MACHINE LEARNING")
-    print("="*70)
-    print()
+    logger.info("="*70)
+    logger.info("ORE GRADE FORECASTING WITH GEOCHEMISTRY AND MACHINE LEARNING")
+    logger.info("="*70)
+    logger.info()
     
     # 1. Fetch and prepare data
     df = fetch_geochemical_data()
@@ -535,7 +541,7 @@ def main():
     # 6. Comparison
     compare_methods({}, gpr_metrics, xgb_metrics)
     
-    print("\nPipeline complete!")
+    logger.info("\nPipeline complete!")
     
     return {
         'data': gdf,

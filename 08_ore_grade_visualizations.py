@@ -2,6 +2,12 @@
 import sys
 import os
 
+import logging
+logging.basicConfig(
+    level=logging.INFO,
+    format='%(asctime)s - %(levelname)s - %(message)s'
+)
+logger = logging.getLogger(__name__)
 # Add parent directory to path to import plot_style
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 from plot_style import set_tufte_defaults, apply_tufte_style, save_tufte_figure, COLORS
@@ -241,7 +247,7 @@ def create_main_visualization():
     
     # Save
     save_fig('08_ore_grade_main.png')
-    print("✓ Created: 08_ore_grade_main.png")
+    logger.info("✓ Created: 08_ore_grade_main.png")
 
 def create_accuracy_visualization():
     """Create GP model accuracy visualization."""
@@ -332,27 +338,27 @@ def create_accuracy_visualization():
     
     # Save
     save_fig('08_ore_grade_accuracy.png')
-    print("✓ Created: 08_ore_grade_accuracy.png")
+    logger.info("✓ Created: 08_ore_grade_accuracy.png")
 
 def main():
     """Generate all visualizations."""
     set_tufte_defaults()
-    print("=" * 60)
-    print("ORE GRADE FORECASTING - VISUALIZATION GENERATION")
-    print("=" * 60)
-    print()
+    logger.info("=" * 60)
+    logger.info("ORE GRADE FORECASTING - VISUALIZATION GENERATION")
+    logger.info("=" * 60)
+    logger.info()
     
     # Set serif font globally
     plt.rcParams['font.family'] = 'serif'
     
-    print("Creating visualizations...")
+    logger.info("Creating visualizations...")
     create_main_visualization()
     create_accuracy_visualization()
     
-    print()
-    print("=" * 60)
-    print("All visualizations created successfully!")
-    print("=" * 60)
+    logger.info()
+    logger.info("=" * 60)
+    logger.info("All visualizations created successfully!")
+    logger.info("=" * 60)
 
 if __name__ == "__main__":
     main()

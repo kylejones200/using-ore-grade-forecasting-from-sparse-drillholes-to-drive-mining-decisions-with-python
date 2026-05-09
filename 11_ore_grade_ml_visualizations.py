@@ -1,6 +1,12 @@
 import sys
 import os
 
+import logging
+logging.basicConfig(
+    level=logging.INFO,
+    format='%(asctime)s - %(levelname)s - %(message)s'
+)
+logger = logging.getLogger(__name__)
 # Add parent directory to path to import plot_style
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 from plot_style import set_tufte_defaults, apply_tufte_style, save_tufte_figure, COLORS
@@ -91,7 +97,7 @@ def create_main_spatial_prediction_plot():
     """
     Create spatial prediction comparison: Kriging vs GP vs GBT.
     """
-    print("Generating main spatial prediction visualization...")
+    logger.info("Generating main spatial prediction visualization...")
     
     # Generate data
     X, y = generate_synthetic_geochemical_data(n_samples=1000)
@@ -104,16 +110,16 @@ def create_main_spatial_prediction_plot():
     grid_points = np.c_[grid_X.ravel(), grid_Y.ravel()]
     
     # Train models and predict
-    print("  Training Kriging...")
+    logger.info("  Training Kriging...")
     kriging_pred = simple_kriging(X_train, y_train, grid_points).reshape(100, 100)
     
-    print("  Training Gaussian Process...")
+    logger.info("  Training Gaussian Process...")
     kernel_gp = RBF(length_scale=100.0) + WhiteKernel(noise_level=0.01)
     gp_model = GaussianProcessRegressor(kernel=kernel_gp, alpha=0.01, n_restarts_optimizer=3)
     gp_model.fit(X_train, y_train)
     gp_pred = gp_model.predict(grid_points).reshape(100, 100)
     
-    print("  Training Gradient Boosting...")
+    logger.info("  Training Gradient Boosting...")
     gbt_model = GradientBoostingRegressor(n_estimators=100, max_depth=5, random_state=42)
     gbt_model.fit(X_train, y_train)
     gbt_pred = gbt_model.predict(grid_points).reshape(100, 100)
@@ -152,20 +158,20 @@ def create_main_spatial_prediction_plot():
                 dpi=300, bbox_inches='tight')
     plt.close()
     
-    print("✓ Main spatial prediction visualization saved")
+    logger.info("✓ Main spatial prediction visualization saved")
 
 def create_model_comparison_plot():
     """
     Create bar chart comparing model performance metrics.
     """
-    print("Generating model comparison visualization...")
+    logger.info("Generating model comparison visualization...")
     
     # Generate data
     X, y = generate_synthetic_geochemical_data(n_samples=1000)
     X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.3, random_state=42)
     
     # Train models
-    print("  Training models for comparison...")
+    logger.info("  Training models for comparison...")
     
     # Kriging
     kriging_pred = simple_kriging(X_train, y_train, X_test)
@@ -235,30 +241,30 @@ def create_model_comparison_plot():
                 dpi=300, bbox_inches='tight')
     plt.close()
     
-    print(f"✓ Model comparison visualization saved")
-    print(f"  Kriging MAE: {kriging_mae:.3f}, R²: {kriging_r2:.3f}")
-    print(f"  GP MAE: {gp_mae:.3f}, R²: {gp_r2:.3f}")
-    print(f"  GBT MAE: {gbt_mae:.3f}, R²: {gbt_r2:.3f}")
+    logger.info(f"✓ Model comparison visualization saved")
+    logger.info(f"  Kriging MAE: {kriging_mae:.3f}, R²: {kriging_r2:.3f}")
+    logger.info(f"  GP MAE: {gp_mae:.3f}, R²: {gp_r2:.3f}")
+    logger.info(f"  GBT MAE: {gbt_mae:.3f}, R²: {gbt_r2:.3f}")
 
 def main():
     """Generate all visualizations for Blog 11."""
     set_tufte_defaults()
-    print("="*70)
-    print("Blog 11: Ore Grade ML - Visualizations")
-    print("="*70)
-    print()
+    logger.info("="*70)
+    logger.info("Blog 11: Ore Grade ML - Visualizations")
+    logger.info("="*70)
+    logger.info()
     
     create_main_spatial_prediction_plot()
     create_model_comparison_plot()
     
-    print()
-    print("="*70)
-    print("All visualizations generated successfully!")
-    print("="*70)
-    print()
-    print("Files created:")
-    print("  - 11_ore_grade_ml_main.png")
-    print("  - 11_ore_grade_ml_comparison.png")
+    logger.info()
+    logger.info("="*70)
+    logger.info("All visualizations generated successfully!")
+    logger.info("="*70)
+    logger.info()
+    logger.info("Files created:")
+    logger.info("  - 11_ore_grade_ml_main.png")
+    logger.info("  - 11_ore_grade_ml_comparison.png")
 
 if __name__ == "__main__":
     main()

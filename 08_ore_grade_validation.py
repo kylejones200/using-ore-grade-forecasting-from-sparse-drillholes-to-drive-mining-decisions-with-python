@@ -11,6 +11,12 @@ from sklearn.gaussian_process.kernels import RBF, WhiteKernel, ConstantKernel
 from scipy.spatial.distance import cdist
 from sklearn.model_selection import cross_val_score, cross_val_predict
 
+import logging
+logging.basicConfig(
+    level=logging.INFO,
+    format='%(asctime)s - %(levelname)s - %(message)s'
+)
+logger = logging.getLogger(__name__)
 def generate_synthetic_drillhole_data(num_holes=100, domain_size=1000, seed=42):
     """Generate realistic synthetic drillhole assay data."""
     np.random.seed(seed)
@@ -255,31 +261,31 @@ def conditional_simulation(drillhole_data, gp_model, block_size=25, n_realizatio
 
 def main():
     """Run validation tests."""
-    print("=" * 70)
-    print("ORE GRADE FORECASTING - CODE VALIDATION")
-    print("=" * 70)
+    logger.info("=" * 70)
+    logger.info("ORE GRADE FORECASTING - CODE VALIDATION")
+    logger.info("=" * 70)
     
     np.random.seed(42)
     
-    print("\n1. Testing drillhole data generation...")
+    logger.info("\n1. Testing drillhole data generation...")
     drillholes = generate_synthetic_drillhole_data(num_holes=120)
-    print(f"   ✓ Generated {len(drillholes)} drillhole samples")
-    print(f"   ✓ Grade range: {drillholes['au_ppm'].min():.3f} to {drillholes['au_ppm'].max():.2f} ppm Au")
-    print(f"   ✓ Mean grade: {drillholes['au_ppm'].mean():.3f} ppm Au")
+    logger.info(f"   ✓ Generated {len(drillholes)} drillhole samples")
+    logger.info(f"   ✓ Grade range: {drillholes['au_ppm'].min():.3f} to {drillholes['au_ppm'].max():.2f} ppm Au")
+    logger.info(f"   ✓ Mean grade: {drillholes['au_ppm'].mean():.3f} ppm Au")
     
-    print("\n2. Testing variogram analysis...")
+    logger.info("\n2. Testing variogram analysis...")
     variogram = calculate_experimental_variogram(drillholes)
-    print(f"   ✓ Nugget Effect: {variogram['nugget']:.3f}")
-    print(f"   ✓ Sill: {variogram['sill']:.3f}")
-    print(f"   ✓ Range: {variogram['range']:.1f} meters")
+    logger.info(f"   ✓ Nugget Effect: {variogram['nugget']:.3f}")
+    logger.info(f"   ✓ Sill: {variogram['sill']:.3f}")
+    logger.info(f"   ✓ Range: {variogram['range']:.1f} meters")
     
-    print("\n3. Testing Gaussian Process model...")
+    logger.info("\n3. Testing Gaussian Process model...")
     gp_model = build_gp_grade_model(drillholes)
-    print(f"   ✓ Cross-Validated R²: {gp_model['cv_r2']:.3f}")
-    print(f"   ✓ MAE: {gp_model['cv_mae']:.3f} log(ppm)")
-    print(f"   ✓ RMSE: {gp_model['cv_rmse']:.3f} log(ppm)")
+    logger.info(f"   ✓ Cross-Validated R²: {gp_model['cv_r2']:.3f}")
+    logger.info(f"   ✓ MAE: {gp_model['cv_mae']:.3f} log(ppm)")
+    logger.info(f"   ✓ RMSE: {gp_model['cv_rmse']:.3f} log(ppm)")
     
-    print("\n4. Testing block model estimation...")
+    logger.info("\n4. Testing block model estimation...")
     block_model = estimate_block_model(drillholes, gp_model, block_size=50)
     density_t_m3 = 2.7
     block_model['tonnage'] = block_model['block_volume_m3'] * density_t_m3
@@ -291,19 +297,19 @@ def main():
     total_contained_gold = (ore_blocks['tonnage'] * ore_blocks['au_ppm_mean']).sum()
     average_ore_grade = total_contained_gold / total_ore_tonnes if total_ore_tonnes > 0 else 0
     
-    print(f"   ✓ Total Blocks: {len(block_model):,}")
-    print(f"   ✓ Ore Blocks: {len(ore_blocks):,}")
-    print(f"   ✓ Average Ore Grade: {average_ore_grade:.3f} ppm Au")
+    logger.info(f"   ✓ Total Blocks: {len(block_model):,}")
+    logger.info(f"   ✓ Ore Blocks: {len(ore_blocks):,}")
+    logger.info(f"   ✓ Average Ore Grade: {average_ore_grade:.3f} ppm Au")
     
-    print("\n5. Testing conditional simulation...")
+    logger.info("\n5. Testing conditional simulation...")
     simulations = conditional_simulation(drillholes, gp_model, n_realizations=10)
-    print(f"   ✓ Realizations Generated: 10")
-    print(f"   ✓ Blocks per Realization: {len(simulations['mean_grade']):,}")
-    print(f"   ✓ Global P50: {simulations['global_p50']:.3f} ppm Au")
+    logger.info(f"   ✓ Realizations Generated: 10")
+    logger.info(f"   ✓ Blocks per Realization: {len(simulations['mean_grade']):,}")
+    logger.info(f"   ✓ Global P50: {simulations['global_p50']:.3f} ppm Au")
     
-    print("\n" + "=" * 70)
-    print("ALL TESTS PASSED! ✓")
-    print("=" * 70)
+    logger.info("\n" + "=" * 70)
+    logger.info("ALL TESTS PASSED! ✓")
+    logger.info("=" * 70)
 
 if __name__ == "__main__":
     main()

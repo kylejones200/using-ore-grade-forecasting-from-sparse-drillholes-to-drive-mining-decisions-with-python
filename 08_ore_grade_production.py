@@ -2,6 +2,12 @@
 """
 Ore Grade Forecasting - Production Implementation
 
+import logging
+logging.basicConfig(
+    level=logging.INFO,
+    format='%(asctime)s - %(levelname)s - %(message)s'
+)
+logger = logging.getLogger(__name__)
 Clean implementation of spatial grade estimation using Gaussian Processes
 and geostatistical methods.
 """
@@ -130,33 +136,33 @@ def estimate_block_model(drillhole_data, gp_model, block_size=25):
 
 def main():
     """Execute ore grade forecasting analysis."""
-    print("=" * 70)
-    print("ORE GRADE FORECASTING - PRODUCTION RUN")
-    print("=" * 70)
+    logger.info("=" * 70)
+    logger.info("ORE GRADE FORECASTING - PRODUCTION RUN")
+    logger.info("=" * 70)
     
     start_time = time.time()
     
-    print("\n1. Generating Drillhole Data...")
+    logger.info("\n1. Generating Drillhole Data...")
     drillholes = generate_synthetic_drillhole_data(num_holes=120)
-    print(f"   Generated {len(drillholes)} drillhole samples")
-    print(f"   Grade range: {drillholes['au_ppm'].min():.3f} to {drillholes['au_ppm'].max():.2f} ppm Au")
-    print(f"   Mean grade: {drillholes['au_ppm'].mean():.3f} ppm Au")
+    logger.info(f"   Generated {len(drillholes)} drillhole samples")
+    logger.info(f"   Grade range: {drillholes['au_ppm'].min():.3f} to {drillholes['au_ppm'].max():.2f} ppm Au")
+    logger.info(f"   Mean grade: {drillholes['au_ppm'].mean():.3f} ppm Au")
     
-    print("\n2. Variogram Analysis...")
+    logger.info("\n2. Variogram Analysis...")
     variogram = calculate_experimental_variogram(drillholes)
-    print(f"   Nugget: {variogram['nugget']:.3f}")
-    print(f"   Sill: {variogram['sill']:.3f}")
-    print(f"   Range: {variogram['range']:.1f} meters")
+    logger.info(f"   Nugget: {variogram['nugget']:.3f}")
+    logger.info(f"   Sill: {variogram['sill']:.3f}")
+    logger.info(f"   Range: {variogram['range']:.1f} meters")
     
-    print("\n3. Building Gaussian Process Model...")
+    logger.info("\n3. Building Gaussian Process Model...")
     gp_model = build_gp_grade_model(drillholes)
-    print(f"   Cross-Validated R²: {gp_model['cv_r2']:.3f}")
-    print(f"   MAE: {gp_model['cv_mae']:.3f} log(ppm)")
-    print(f"   RMSE: {gp_model['cv_rmse']:.3f} log(ppm)")
+    logger.info(f"   Cross-Validated R²: {gp_model['cv_r2']:.3f}")
+    logger.info(f"   MAE: {gp_model['cv_mae']:.3f} log(ppm)")
+    logger.info(f"   RMSE: {gp_model['cv_rmse']:.3f} log(ppm)")
     
-    print("\n4. Generating Block Model...")
+    logger.info("\n4. Generating Block Model...")
     block_model = estimate_block_model(drillholes, gp_model, block_size=25)
-    print(f"   Total Blocks: {len(block_model):,}")
+    logger.info(f"   Total Blocks: {len(block_model):,}")
     
     density_t_m3 = 2.7
     block_model['tonnage'] = block_model['block_volume_m3'] * density_t_m3
@@ -166,34 +172,34 @@ def main():
     total_contained_gold = (ore_blocks['tonnage'] * ore_blocks['au_ppm_mean']).sum()
     average_ore_grade = total_contained_gold / total_ore_tonnes if total_ore_tonnes > 0 else 0
     
-    print(f"   Ore Blocks (>{cutoff_grade} ppm): {len(ore_blocks):,}")
-    print(f"   Total Ore Tonnage: {total_ore_tonnes:,.0f} tonnes")
-    print(f"   Average Ore Grade: {average_ore_grade:.3f} ppm Au")
-    print(f"   Contained Gold: {total_contained_gold / 1e6:.2f} million grams")
+    logger.info(f"   Ore Blocks (>{cutoff_grade} ppm): {len(ore_blocks):,}")
+    logger.info(f"   Total Ore Tonnage: {total_ore_tonnes:,.0f} tonnes")
+    logger.info(f"   Average Ore Grade: {average_ore_grade:.3f} ppm Au")
+    logger.info(f"   Contained Gold: {total_contained_gold / 1e6:.2f} million grams")
     
-    print("\n5. Resource Classification...")
+    logger.info("\n5. Resource Classification...")
     resource_summary = ore_blocks.groupby('classification')['tonnage'].sum()
     for category in ['Measured', 'Indicated', 'Inferred']:
         tonnes = resource_summary.get(category, 0)
         pct = (tonnes / total_ore_tonnes * 100) if total_ore_tonnes > 0 else 0
-        print(f"   {category}: {tonnes:,.0f} tonnes ({pct:.1f}%)")
+        logger.info(f"   {category}: {tonnes:,.0f} tonnes ({pct:.1f}%)")
     
-    print("\n6. Exporting Results...")
+    logger.info("\n6. Exporting Results...")
     drillholes.to_csv('drillhole_data.csv', index=False)
     block_model.to_csv('block_model_grades.csv', index=False)
-    print("   Exported: drillhole_data.csv")
-    print("   Exported: block_model_grades.csv")
+    logger.info("   Exported: drillhole_data.csv")
+    logger.info("   Exported: block_model_grades.csv")
     
     execution_time = time.time() - start_time
     
-    print("\n" + "=" * 70)
-    print("PERFORMANCE METRICS")
-    print("=" * 70)
-    print(f"Total Execution Time: {execution_time:.3f} seconds")
-    print(f"Drillholes Processed: {len(drillholes)}")
-    print(f"Blocks Estimated: {len(block_model):,}")
-    print(f"Model R²: {gp_model['cv_r2']:.3f}")
-    print("=" * 70)
+    logger.info("\n" + "=" * 70)
+    logger.info("PERFORMANCE METRICS")
+    logger.info("=" * 70)
+    logger.info(f"Total Execution Time: {execution_time:.3f} seconds")
+    logger.info(f"Drillholes Processed: {len(drillholes)}")
+    logger.info(f"Blocks Estimated: {len(block_model):,}")
+    logger.info(f"Model R²: {gp_model['cv_r2']:.3f}")
+    logger.info("=" * 70)
 
 if __name__ == "__main__":
     main()
