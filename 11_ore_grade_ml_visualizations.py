@@ -93,7 +93,7 @@ def simple_kriging(X_train, y_train, X_test):
     y_pred = gp.predict(X_test)
     return y_pred
 
-def create_main_spatial_prediction_plot():
+def create_main_spatial_prediction_plot(plot: bool = False):
     """
     Create spatial prediction comparison: Kriging vs GP vs GBT.
     """
@@ -125,42 +125,43 @@ def create_main_spatial_prediction_plot():
     gbt_pred = gbt_model.predict(grid_points).reshape(100, 100)
     
     # Create figure with 3 subplots
-    fig, axes = plt.subplots(1, 3, figsize=(15, 5))
+    if plot:
+        fig, axes = plt.subplots(1, 3, figsize=(15, 5))
     
-    titles = ['Ordinary Kriging', 'Gaussian Process', 'Gradient Boosted Trees']
-    predictions = [kriging_pred, gp_pred, gbt_pred]
+        titles = ['Ordinary Kriging', 'Gaussian Process', 'Gradient Boosted Trees']
+        predictions = [kriging_pred, gp_pred, gbt_pred]
     
-    for ax, title, pred in zip(axes, titles, predictions):
+        for ax, title, pred in zip(axes, titles, predictions):
         # Contour plot
-        contour = ax.contourf(grid_X, grid_Y, pred, levels=15, cmap='gray', alpha=0.8)
+            contour = ax.contourf(grid_X, grid_Y, pred, levels=15, cmap='gray', alpha=0.8)
         
         # Overlay drill holes
-        scatter = ax.scatter(X_train[:, 0], X_train[:, 1], c=y_train, 
-                           s=30, cmap='gray', edgecolors='white', linewidth=0.5,
-                           vmin=pred.min(), vmax=pred.max(), zorder=10)
+            scatter = ax.scatter(X_train[:, 0], X_train[:, 1], c=y_train, 
+                               s=30, cmap='gray', edgecolors='white', linewidth=0.5,
+                               vmin=pred.min(), vmax=pred.max(), zorder=10)
         
         # Apply minimalist style
-        apply_minimalist_style_manual(ax)
+            apply_minimalist_style_manual(ax)
         
-        ax.set_xlabel('Easting (m)', fontsize=9)
-        ax.set_ylabel('Northing (m)', fontsize=9)
-        ax.set_title(title, fontsize=11, fontweight='bold', loc='center', pad=10)
-        ax.set_aspect('equal')
+            ax.set_xlabel('Easting (m)', fontsize=9)
+            ax.set_ylabel('Northing (m)', fontsize=9)
+            ax.set_title(title, fontsize=11, fontweight='bold', loc='center', pad=10)
+            ax.set_aspect('equal')
     
     # Add colorbar
-    cbar = fig.colorbar(contour, ax=axes, orientation='horizontal', 
-                       pad=0.08, aspect=40, shrink=0.8)
-    cbar.set_label('Cu Grade (%)', fontsize=10)
-    cbar.outline.set_visible(False)
+        cbar = fig.colorbar(contour, ax=axes, orientation='horizontal', 
+                           pad=0.08, aspect=40, shrink=0.8)
+        cbar.set_label('Cu Grade (%)', fontsize=10)
+        cbar.outline.set_visible(False)
     
-    plt.tight_layout()
-    plt.savefig('/Users/k.jones/Desktop/blogs/blog_posts/11_ore_grade_ml_main.png', 
-                dpi=300, bbox_inches='tight')
-    plt.close()
+        plt.tight_layout()
+        plt.savefig('/Users/k.jones/Desktop/blogs/blog_posts/11_ore_grade_ml_main.png', 
+                    dpi=300, bbox_inches='tight')
+        plt.close()
     
     logger.info("✓ Main spatial prediction visualization saved")
 
-def create_model_comparison_plot():
+def create_model_comparison_plot(plot: bool = False):
     """
     Create bar chart comparing model performance metrics.
     """
@@ -194,52 +195,53 @@ def create_model_comparison_plot():
     gbt_r2 = 1 - np.sum((y_test - gbt_pred)**2) / np.sum((y_test - np.mean(y_test))**2)
     
     # Create figure
-    fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(12, 5))
+    if plot:
+        fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(12, 5))
     
-    models = ['Kriging', 'Gaussian\nProcess', 'Gradient\nBoosting']
-    mae_values = [kriging_mae, gp_mae, gbt_mae]
-    r2_values = [kriging_r2, gp_r2, gbt_r2]
+        models = ['Kriging', 'Gaussian\nProcess', 'Gradient\nBoosting']
+        mae_values = [kriging_mae, gp_mae, gbt_mae]
+        r2_values = [kriging_r2, gp_r2, gbt_r2]
     
-    colors = ['#0074D9', '#2ECC40', '#FF851B']
+        colors = ['#0074D9', '#2ECC40', '#FF851B']
     
     # Left panel: MAE
-    bars1 = ax1.bar(models, mae_values, color=colors, edgecolor='black', linewidth=1.5)
+        bars1 = ax1.bar(models, mae_values, color=colors, edgecolor='black', linewidth=1.5)
     
-    for bar, val in zip(bars1, mae_values):
-        height = bar.get_height()
-        ax1.text(bar.get_x() + bar.get_width()/2., height,
-                f'{val:.3f}',
-                ha='center', va='bottom', fontsize=10, fontweight='bold')
+        for bar, val in zip(bars1, mae_values):
+            height = bar.get_height()
+            ax1.text(bar.get_x() + bar.get_width()/2., height,
+                    f'{val:.3f}',
+                    ha='center', va='bottom', fontsize=10, fontweight='bold')
     
-    apply_minimalist_style_manual(ax1)
-    ax1.set_ylabel('Mean Absolute Error (% Cu)', fontsize=10)
-    ax1.set_title('Prediction Error', fontsize=12, fontweight='bold', loc='left', pad=20)
-    ax1.set_ylim(0, max(mae_values) * 1.2)
+        apply_minimalist_style_manual(ax1)
+        ax1.set_ylabel('Mean Absolute Error (% Cu)', fontsize=10)
+        ax1.set_title('Prediction Error', fontsize=12, fontweight='bold', loc='left', pad=20)
+        ax1.set_ylim(0, max(mae_values) * 1.2)
     
     # Right panel: R²
-    bars2 = ax2.bar(models, r2_values, color=colors, edgecolor='black', linewidth=1.5)
+        bars2 = ax2.bar(models, r2_values, color=colors, edgecolor='black', linewidth=1.5)
     
-    for bar, val in zip(bars2, r2_values):
-        height = bar.get_height()
-        ax2.text(bar.get_x() + bar.get_width()/2., height,
-                f'{val:.3f}',
-                ha='center', va='bottom', fontsize=10, fontweight='bold')
+        for bar, val in zip(bars2, r2_values):
+            height = bar.get_height()
+            ax2.text(bar.get_x() + bar.get_width()/2., height,
+                    f'{val:.3f}',
+                    ha='center', va='bottom', fontsize=10, fontweight='bold')
     
-    apply_minimalist_style_manual(ax2)
-    ax2.set_ylabel('R² Score', fontsize=10)
-    ax2.set_title('Predictive Performance', fontsize=12, fontweight='bold', loc='left', pad=20)
-    ax2.set_ylim(0, 1.1)
-    ax2.axhline(y=0.8, color='gray', linestyle='--', linewidth=1, alpha=0.5)
+        apply_minimalist_style_manual(ax2)
+        ax2.set_ylabel('R² Score', fontsize=10)
+        ax2.set_title('Predictive Performance', fontsize=12, fontweight='bold', loc='left', pad=20)
+        ax2.set_ylim(0, 1.1)
+        ax2.axhline(y=0.8, color='gray', linestyle='--', linewidth=1, alpha=0.5)
     
     # Add summary annotation
-    fig.text(0.5, 0.02, 
-            f'Test Set: n={len(X_test)} | Train Set: n={len(X_train)} | Best Model: Gradient Boosting (MAE={gbt_mae:.3f}, R²={gbt_r2:.3f})',
-            ha='center', fontsize=9, style='italic', color='black')
+        fig.text(0.5, 0.02, 
+                f'Test Set: n={len(X_test)} | Train Set: n={len(X_train)} | Best Model: Gradient Boosting (MAE={gbt_mae:.3f}, R²={gbt_r2:.3f})',
+                ha='center', fontsize=9, style='italic', color='black')
     
-    plt.tight_layout(rect=[0, 0.05, 1, 1])
-    plt.savefig('/Users/k.jones/Desktop/blogs/blog_posts/11_ore_grade_ml_comparison.png', 
-                dpi=300, bbox_inches='tight')
-    plt.close()
+        plt.tight_layout(rect=[0, 0.05, 1, 1])
+        plt.savefig('/Users/k.jones/Desktop/blogs/blog_posts/11_ore_grade_ml_comparison.png', 
+                    dpi=300, bbox_inches='tight')
+        plt.close()
     
     logger.info(f"✓ Model comparison visualization saved")
     logger.info(f"  Kriging MAE: {kriging_mae:.3f}, R²: {kriging_r2:.3f}")
