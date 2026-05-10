@@ -1,42 +1,28 @@
+---
+author: "Kyle Jones"
+date_published: "October 7, 2025"
+date_exported_from_medium: "November 10, 2025"
+canonical_link: "https://medium.com/@kyle-t-jones/using-ore-grade-forecasting-from-sparse-drillholes-to-drive-mining-decisions-with-python-a6c30edb6332"
+---
+
 # Using Ore Grade Forecasting from Sparse Drillholes to Drive Mining Decisions with Python Mining companies use spatial grade forecasting in mine planning,
-investment decisions, and production optimization. Ore grade
-forecasting...
+investment decisions, and production optimization. Ore grade forecasting...
 
 ### Using Ore Grade Forecasting from Sparse Drillholes to Drive Mining Decisions with Python
-Mining companies use spatial grade forecasting in mine planning,
-investment decisions, and production optimization. Ore grade forecasting
-helps in quantifying uncertainty, understanding spatial correlation, and
-making optimal decisions under incomplete information. Modern machine
-learning techniques augment traditional geostatistics, delivering more
-accurate predictions and more realistic uncertainty estimates that
-enable better capital allocation.
+Mining companies use spatial grade forecasting in mine planning, investment decisions, and production optimization. Ore grade forecasting helps in quantifying uncertainty, understanding spatial correlation, and making optimal decisions under incomplete information. Modern machine learning techniques augment traditional geostatistics, delivering more accurate predictions and more realistic uncertainty estimates that enable better capital allocation.
 
 ### Why Grade Forecasting Determines Mine Value
-Every mining operation is built on grade estimates derived from sparse
-sampling. A typical gold deposit might have drillholes spaced 50--100
-meters apart, yet mining decisions operate at 5--10 meter block scales.
-This means 95--99% of your resource tonnage is based on interpolation
-rather than direct measurement.
+Every mining operation is built on grade estimates derived from sparse sampling. A typical gold deposit might have drillholes spaced 50--100 meters apart, yet mining decisions operate at 5--10 meter block scales. This means 95--99% of your resource tonnage is based on interpolation rather than direct measurement.
 
-Mining companies use grade forecasting to estimate mineral resources and
-ore reserves for regulatory reporting and financing and optimize pit
-shell designs to maximize net present value
+Mining companies use grade forecasting to estimate mineral resources and ore reserves for regulatory reporting and financing and optimize pit shell designs to maximize net present value
 
-It can also be used to schedule mining sequences that meet mill feed
-grade targets and blending requirements, assess acquisition targets and
-bid competitively with quantified confidence levels, and manage
-production risk through realistic simulation of grade variability.
+It can also be used to schedule mining sequences that meet mill feed grade targets and blending requirements, assess acquisition targets and bid competitively with quantified confidence levels, and manage production risk through realistic simulation of grade variability.
 
-The difference between a forecast error of 15% versus 8% can mean the
-difference between a profitable mine and a stranded asset. When copper
-grades decline from 0.8% to 0.6%, operating margins
-evaporate --- accurate forecasting provides the early warning needed for
-adaptive management.
+The difference between a forecast error of 15% versus 8% can mean the difference between a profitable mine and a stranded asset. When copper grades decline from 0.8% to 0.6%, operating margins evaporate --- accurate forecasting provides the early warning needed for adaptive management.
 
 
 ### Understanding Spatial Correlation in Ore Bodies
-Let's examine how spatial correlation patterns govern grade estimation
-quality:
+Let's examine how spatial correlation patterns govern grade estimation quality:
 
 ```python
 import numpy as np
@@ -120,14 +106,10 @@ print(f"Median grade: {drillholes['au_ppm'].median():.3f} ppm Au")
 print(f"CV (Coefficient of Variation): {drillholes['au_ppm'].std() / drillholes['au_ppm'].mean():.2f}")
 ```
 
-This synthetic data mimics real gold deposit characteristics: log-normal
-grade distributions, spatial correlation ranges of 100--200m, and
-high-grade shoots. The coefficient of variation (CV) above 1.0 is
-typical for precious metals --- grade variability exceeds the mean.
+This synthetic data mimics real gold deposit characteristics: log-normal grade distributions, spatial correlation ranges of 100--200m, and high-grade shoots. The coefficient of variation (CV) above 1.0 is typical for precious metals --- grade variability exceeds the mean.
 
 ### Variogram Analysis: Quantifying Spatial Continuity
-Understanding how grades correlate spatially is fundamental to accurate
-forecasting:
+Understanding how grades correlate spatially is fundamental to accurate forecasting:
 
 ```python
 def calculate_experimental_variogram(data, max_distance=500, n_bins=20):
@@ -228,15 +210,10 @@ print(f"  - Beyond this distance, samples are essentially uncorrelated")
 print(f"  - Nugget represents micro-scale variability + sampling error")
 ```
 
-The range parameter (typically 100--200m for gold deposits) defines how
-far spatial influence extends. Beyond this range, knowing a grade at one
-location provides no information about another location. The
-nugget-to-sill ratio indicates short-range variability --- high ratios
-(\>30%) suggest challenging interpolation conditions.
+The range parameter (typically 100--200m for gold deposits) defines how far spatial influence extends. Beyond this range, knowing a grade at one location provides no information about another location. The nugget-to-sill ratio indicates short-range variability --- high ratios (\>30%) suggest challenging interpolation conditions.
 
 ### Gaussian Process Regression for Grade Estimation
-Modern machine learning provides powerful alternatives to classical
-kriging:
+Modern machine learning provides powerful alternatives to classical kriging:
 
 ```python
 def build_gp_grade_model(training_data, kernel_params=None):
@@ -324,10 +301,7 @@ print(f"  {gp_model['kernel_params']}")
 print(f"\nLog Marginal Likelihood: {gp_model['log_marginal_likelihood']:.2f}")
 ```
 
-The Gaussian Process naturally provides uncertainty
-estimates --- critical for risk assessment. R² values above 0.6 indicate
-good spatial structure; values below 0.4 suggest highly erratic
-mineralization requiring denser drilling.
+The Gaussian Process naturally provides uncertainty estimates --- critical for risk assessment. R² values above 0.6 indicate good spatial structure; values below 0.4 suggest highly erratic mineralization requiring denser drilling.
 
 ### Block Model Grade Estimation
 Production mining requires grade estimates on regular block grids:
@@ -440,14 +414,10 @@ print(f"\nResource Classification:")
 print(resource_summary)
 ```
 
-This block model forms the basis for mine planning. Measured and
-Indicated resources support ore reserve declarations, while Inferred
-resources guide exploration targeting. Uncertainty quantification
-enables risk-adjusted economic analysis.
+This block model forms the basis for mine planning. Measured and Indicated resources support ore reserve declarations, while Inferred resources guide exploration targeting. Uncertainty quantification enables risk-adjusted economic analysis.
 
 ### Conditional Simulation for Production Planning
-Single grade estimates don't capture variability experienced during
-mining:
+Single grade estimates don't capture variability experienced during mining:
 
 ```python
 def conditional_simulation(drillhole_data, gp_model, block_size=25, n_realizations=20):
@@ -534,46 +504,19 @@ print(f"  - There's 80% probability the average grade falls between P10 and P90"
 print(f"  - This range quantifies production risk for financial modeling")
 ```
 
-Simulation provides realistic grade distributions for each mining block.
-Running mine plans through multiple realizations reveals production
-risk --- will mill feed stay within target grades? Do stockpile
-strategies buffer variability effectively?
+Simulation provides realistic grade distributions for each mining block. Running mine plans through multiple realizations reveals production risk --- will mill feed stay within target grades? Do stockpile strategies buffer variability effectively?
 
 ### Key Takeaways for Mining Professionals
-Ore grade forecasting transforms sparse drillhole data into actionable
-mining intelligence. The analysis presented here demonstrates several
-critical principles:
+Ore grade forecasting transforms sparse drillhole data into actionable mining intelligence. The analysis presented here demonstrates several critical principles:
 
-1\. Spatial Correlation Structure Determines Estimation Quality:
-Understanding variogram range and structure reveals how far information
-propagates. Short ranges require dense drilling; long ranges enable
-wider spacing.
+1\. Spatial Correlation Structure Determines Estimation Quality: Understanding variogram range and structure reveals how far information propagates. Short ranges require dense drilling; long ranges enable wider spacing.
 
-2\. Uncertainty Quantification Enables Risk Management: Single "best
-estimate" models hide production risk. Probability distributions and
-simulation reveal the range of outcomes for robust planning.
+2\. Uncertainty Quantification Enables Risk Management: Single "best estimate" models hide production risk. Probability distributions and simulation reveal the range of outcomes for robust planning.
 
-3\. Log-Normal Transformation Improves Estimates: Grade data typically
-follows log-normal distributions. Working in log-space produces more
-stable interpolations and better uncertainty estimates.
+3\. Log-Normal Transformation Improves Estimates: Grade data typically follows log-normal distributions. Working in log-space produces more stable interpolations and better uncertainty estimates.
 
-4\. Machine Learning Augments Traditional Methods: Gaussian Processes
-provide flexible alternatives to kriging with automated hyperparameter
-selection and comparable theoretical foundations.
+4\. Machine Learning Augments Traditional Methods: Gaussian Processes provide flexible alternatives to kriging with automated hyperparameter selection and comparable theoretical foundations.
 
-5\. Block Model Resolution Affects Decisions: Fine blocks (5--10m)
-support operational planning; coarse blocks (25--50m) suit reserve
-estimation. Match resolution to decision scale.
+5\. Block Model Resolution Affects Decisions: Fine blocks (5--10m) support operational planning; coarse blocks (25--50m) suit reserve estimation. Match resolution to decision scale.
 
-This project show how operators can get started using variogram analysis
-and then implement GP estimation. We can incorporate simulation for a
-more robust risk assessment.
-
-
-::::::::By [Kyle Jones](https://medium.com/@kyle-t-jones) on
-[October 7, 2025](https://medium.com/p/a6c30edb6332).
-
-[Canonical
-link](https://medium.com/@kyle-t-jones/using-ore-grade-forecasting-from-sparse-drillholes-to-drive-mining-decisions-with-python-a6c30edb6332)
-
-Exported from [Medium](https://medium.com) on November 10, 2025.
+This project show how operators can get started using variogram analysis and then implement GP estimation. We can incorporate simulation for a more robust risk assessment.
