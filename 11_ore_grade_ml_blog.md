@@ -28,7 +28,7 @@ The key insight: when geochemical covariates (Cu, As, Fe, S, Pb) add signal beyo
 
 The `fetch_geochemical_data()`, `prepare_spatial_features()`, and `create_spatial_folds()` functions in the Complete Implementation section demonstrate data preparation and feature engineering for spatial machine learning.
 
-**Output:**
+Output:
 ```
 Prepared 250 samples
 Au range: 0.001 - 4.856 ppm
@@ -49,9 +49,9 @@ Spatial cross-validation prevents data leakage. Standard k-fold CV would allow n
 
 ## Baseline: Ordinary Kriging
 
-Kriging is the gold standard (pun intended) for spatial interpolation in mining. It's a Best Linear Unbiased Predictor (BLUP) that weights nearby observations based on their spatial correlation structure, captured by the **variogram**. The `fit_variogram()` and `ordinary_kriging_predict()` functions in the Complete Implementation section demonstrate experimental variogram fitting and ordinary kriging interpolation.
+Kriging is the gold standard (pun intended) for spatial interpolation in mining. It's a Best Linear Unbiased Predictor (BLUP) that weights nearby observations based on their spatial correlation structure, captured by the variogram. The `fit_variogram()` and `ordinary_kriging_predict()` functions in the Complete Implementation section demonstrate experimental variogram fitting and ordinary kriging interpolation.
 
-**Output:**
+Output:
 ```
 Variogram Parameters:
   Model: spherical
@@ -74,7 +74,7 @@ The range of 142.6 km defines the distance beyond which samples are essentially 
 
 GPR extends Kriging by incorporating additional features (geochemical covariates, lithology) while maintaining probabilistic outputs. The kernel function defines both spatial correlation and feature similarity. The `train_gaussian_process()` function in the Complete Implementation section demonstrates how to train a Gaussian Process Regressor with spatial cross-validation, using a Matérn kernel for spatial correlation combined with feature similarity.
 
-**Output:**
+Output:
 ```
 Gaussian Process Cross-Validation:
   Fold 0: MAE=0.287, RMSE=0.392
@@ -98,7 +98,7 @@ The Matérn kernel (ν=1.5) provides a good balance between smoothness (ν→∞
 
 XGBoost sacrifices probabilistic outputs for raw predictive power and computational speed. It's the workhorse of modern ML competitions—and increasingly, of mining companies with tight deadlines. The `train_xgboost()` function in the Complete Implementation section demonstrates XGBoost training with spatial cross-validation and feature importance analysis.
 
-**Output:**
+Output:
 ```
 XGBoost Cross-Validation:
   Fold 0: MAE=0.245, RMSE=0.334
@@ -127,7 +127,7 @@ Feature importance reveals that spatial coordinates (x, y) dominate, followed by
 
 The `create_prediction_grid()` function in the Complete Implementation section generates grade predictions on a regular grid for all three methods (Ordinary Kriging, Gaussian Process, and XGBoost), interpolating covariate values to grid points and producing comparable prediction surfaces.
 
-**Output:**
+Output:
 ```
 Ordinary Kriging Results:
   Grid size: 150 × 150
@@ -154,7 +154,7 @@ The `create_grade_maps()` function in the Complete Implementation section genera
 
 The `analyze_uncertainty_calibration()` and `compare_methods()` functions in the Complete Implementation section analyze how well predicted uncertainty matches actual error and provide comprehensive comparison across all three methods.
 
-**Output:**
+Output:
 ```
 Uncertainty Calibration:
    predicted_std  actual_rmse  n_samples
@@ -211,26 +211,26 @@ The complete pipeline integrates data preparation, variogram analysis, model tra
 
 ## Extensions and Future Directions
 
-**3D Block Modeling** - Extend to drillhole intercepts with depth dimension. Use 3D variograms and anisotropic kernels to capture vertical vs horizontal correlation structures.
+3D Block Modeling - Extend to drillhole intercepts with depth dimension. Use 3D variograms and anisotropic kernels to capture vertical vs horizontal correlation structures.
 
-**Multi-Output Prediction** - Jointly predict Au, Cu, Ag, Zn using multi-output GPR or co-kriging. Geological relationships between elements improve individual predictions.
+Multi-Output Prediction - Jointly predict Au, Cu, Ag, Zn using multi-output GPR or co-kriging. Geological relationships between elements improve individual predictions.
 
-**Quantile Regression** - For tree models, train separate quantile models (10th, 50th, 90th percentiles) to approximate prediction intervals.
+Quantile Regression - For tree models, train separate quantile models (10th, 50th, 90th percentiles) to approximate prediction intervals.
 
-**Remote Sensing Integration** - Add satellite-derived features: digital elevation models reveal structural controls, aeromagnetics indicate intrusions, radiometrics map alteration zones.
+Remote Sensing Integration - Add satellite-derived features: digital elevation models reveal structural controls, aeromagnetics indicate intrusions, radiometrics map alteration zones.
 
-**Adaptive Drilling** - Use uncertainty maps to optimize next drilling locations. Information-theoretic approaches (expected information gain) maximize resource definition per drill meter.
+Adaptive Drilling - Use uncertainty maps to optimize next drilling locations. Information-theoretic approaches (expected information gain) maximize resource definition per drill meter.
 
-**Real-Time Updates** - As new assays arrive, incrementally update GP predictions without full retraining. Online GP methods enable continuous resource model refinement.
+Real-Time Updates - As new assays arrive, incrementally update GP predictions without full retraining. Online GP methods enable continuous resource model refinement.
 
 ## Conclusion
 
 Grade forecasting has evolved beyond spatial interpolation. When you combine geochemical understanding with modern ML, you gain:
 
-- **Better accuracy** through learned element relationships
-- **Calibrated uncertainty** for resource classification and risk management  
-- **Computational efficiency** enabling rapid scenario analysis
-- **Actionable insights** that guide drilling, pit optimization, and hedging strategies
+- Better accuracy through learned element relationships
+- Calibrated uncertainty for resource classification and risk management  
+- Computational efficiency enabling rapid scenario analysis
+- Actionable insights that guide drilling, pit optimization, and hedging strategies
 
 The difference between a $180 million loss and a profitable quarter often comes down to how well you model grade uncertainty. Traditional Kriging is defensible but limited. Gaussian Processes add probabilistic rigor. XGBoost adds raw power. Use all three—each has its place in the modern mining workflow.
 
@@ -238,11 +238,11 @@ The code is clean and working. The data is open. The methods are proven. Now go 
 
 ---
 
-**Data Source:** National Geochemical Survey of Australia (NGSA), Geoscience Australia  
-**Methods:** Ordinary Kriging (PyKrige), Gaussian Process Regression (scikit-learn), XGBoost  
-**Spatial Reference:** EPSG:32750 (UTM Zone 50S, WGS84)  
-**Cross-Validation:** 5-fold spatial GroupKFold on x-coordinate bands  
-**Performance:** GPR MAE=0.293, XGBoost MAE=0.252, 95% CI coverage=94.8%
+Data Source: National Geochemical Survey of Australia (NGSA), Geoscience Australia  
+Methods: Ordinary Kriging (PyKrige), Gaussian Process Regression (scikit-learn), XGBoost  
+Spatial Reference: EPSG:32750 (UTM Zone 50S, WGS84)  
+Cross-Validation: 5-fold spatial GroupKFold on x-coordinate bands  
+Performance: GPR MAE=0.293, XGBoost MAE=0.252, 95% CI coverage=94.8%
 
 ## Complete Implementation
 
