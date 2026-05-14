@@ -28,13 +28,8 @@ logging.basicConfig(
     format='%(asctime)s - %(levelname)s - %(message)s'
 )
 logger = logging.getLogger(__name__)
-# Import Tufte plotting utilities
 import sys
 from pathlib import Path
-sys.path.insert(0, str(Path(__file__).parent.parent))
-from tda_utils import setup_tufte_plot, TufteColors
-
-
 def fetch_geochemical_data(region_bounds=None):
     """
     Fetch geochemical data from Geoscience Australia.
