@@ -251,18 +251,14 @@ def create_model_comparison_plot(plot: bool = False):
 def main():
     """Generate all visualizations for Blog 11."""
     set_tufte_defaults()
-    logger.info("="*70)
     logger.info("Blog 11: Ore Grade ML - Visualizations")
-    logger.info("="*70)
     logger.info()
     
     create_main_spatial_prediction_plot()
     create_model_comparison_plot()
     
     logger.info()
-    logger.info("="*70)
     logger.info("All visualizations generated successfully!")
-    logger.info("="*70)
     logger.info()
     logger.info("Files created:")
     logger.info("  - 11_ore_grade_ml_main.png")

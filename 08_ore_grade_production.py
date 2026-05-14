@@ -136,9 +136,7 @@ def estimate_block_model(drillhole_data, gp_model, block_size=25):
 
 def main():
     """Execute ore grade forecasting analysis."""
-    logger.info("=" * 70)
     logger.info("ORE GRADE FORECASTING - PRODUCTION RUN")
-    logger.info("=" * 70)
     
     start_time = time.time()
     
@@ -192,14 +190,11 @@ def main():
     
     execution_time = time.time() - start_time
     
-    logger.info("\n" + "=" * 70)
-    logger.info("PERFORMANCE METRICS")
-    logger.info("=" * 70)
+    logger.info("=== PERFORMANCE METRICS ===")
     logger.info(f"Total Execution Time: {execution_time:.3f} seconds")
     logger.info(f"Drillholes Processed: {len(drillholes)}")
     logger.info(f"Blocks Estimated: {len(block_model):,}")
     logger.info(f"Model R²: {gp_model['cv_r2']:.3f}")
-    logger.info("=" * 70)
 
 if __name__ == "__main__":
     main()

@@ -261,9 +261,7 @@ def conditional_simulation(drillhole_data, gp_model, block_size=25, n_realizatio
 
 def main():
     """Run validation tests."""
-    logger.info("=" * 70)
     logger.info("ORE GRADE FORECASTING - CODE VALIDATION")
-    logger.info("=" * 70)
     
     np.random.seed(42)
     
@@ -307,9 +305,7 @@ def main():
     logger.info(f"   ✓ Blocks per Realization: {len(simulations['mean_grade']):,}")
     logger.info(f"   ✓ Global P50: {simulations['global_p50']:.3f} ppm Au")
     
-    logger.info("\n" + "=" * 70)
-    logger.info("ALL TESTS PASSED! ✓")
-    logger.info("=" * 70)
+    logger.info("=== ALL TESTS PASSED! ✓ ===")
 
 if __name__ == "__main__":
     main()

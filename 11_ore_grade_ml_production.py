@@ -484,9 +484,7 @@ def compare_methods(ok_metrics, gpr_metrics, xgb_metrics):
     """
     Comparative summary of all three methods.
     """
-    logger.info("\n" + "="*70)
-    logger.info("MODEL COMPARISON SUMMARY")
-    logger.info("="*70)
+    logger.info("=== MODEL COMPARISON SUMMARY ===")
     
     logger.info("\nAccuracy Metrics:")
     logger.info(f"  Ordinary Kriging:    MAE = N/A (no CV), RMSE = N/A")
@@ -508,13 +506,10 @@ def compare_methods(ok_metrics, gpr_metrics, xgb_metrics):
     logger.info("  Gaussian Process:    When you need calibrated uncertainty + covariates")
     logger.info("  XGBoost:             Production forecasting with tight deadlines")
     
-    logger.info("="*70)
 
 def main():
     """Complete ore grade forecasting pipeline."""
-    logger.info("="*70)
     logger.info("ORE GRADE FORECASTING WITH GEOCHEMISTRY AND MACHINE LEARNING")
-    logger.info("="*70)
     logger.info()
     
     # 1. Fetch and prepare data

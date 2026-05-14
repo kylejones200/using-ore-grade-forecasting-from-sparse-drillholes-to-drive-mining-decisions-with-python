@@ -44,9 +44,7 @@ from tda_utils import setup_tufte_plot, TufteColors
 
 def main():
     """Run validation tests for all functions."""
-    logger.info("="*70)
     logger.info("BLOG 11 VALIDATION - ORE GRADE FORECASTING WITH ML")
-    logger.info("="*70)
     logger.info()
     
     try:
@@ -127,9 +125,7 @@ def main():
         compare_methods({}, gpr_metrics, xgb_metrics)
         logger.info("✓ Method comparison completed\n")
         
-        logger.info("="*70)
         logger.info("ALL VALIDATION TESTS PASSED!")
-        logger.info("="*70)
         logger.info()
         
         # Summary statistics
