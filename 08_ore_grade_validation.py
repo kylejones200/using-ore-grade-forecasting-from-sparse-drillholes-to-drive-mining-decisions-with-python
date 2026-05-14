@@ -70,8 +70,8 @@ def calculate_experimental_variogram(data, max_distance=500, n_bins=20):
             dist = np.linalg.norm(coords[i] - coords[j])
             if dist <= max_distance:
                 semivar = 0.5 * (grades[i] - grades[j]) ** 2
-                distances.append(dist)
-                semivariances.append(semivar)
+                pd.concat([distances, dist])
+                pd.concat([semivariances, semivar])
     
     distances = np.array(distances)
     semivariances = np.array(semivariances)
@@ -88,7 +88,7 @@ def calculate_experimental_variogram(data, max_distance=500, n_bins=20):
             bin_counts.append(mask.sum())
         else:
             binned_semivariance.append(np.nan)
-            bin_counts.append(0)
+            pd.concat([bin_counts, 0])
     
     binned_semivariance = np.array(binned_semivariance)
     
@@ -233,7 +233,7 @@ def conditional_simulation(drillhole_data, gp_model, block_size=25, n_realizatio
     for i in range(n_realizations):
         sample = gp_model['model'].sample_y(block_coords_norm, n_samples=1, random_state=i)
         grade_realization = np.exp(sample.ravel())
-        realizations.append(grade_realization)
+        pd.concat([realizations, grade_realization])
     
     realizations = np.array(realizations)
     

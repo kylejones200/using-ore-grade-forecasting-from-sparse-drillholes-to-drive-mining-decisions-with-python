@@ -45,63 +45,85 @@ def main():
         # Test 1: Data fetching
         logger.info("TEST 1: Fetching geochemical data...")
         df = fetch_geochemical_data()
-        assert len(df) == 250, "Expected 250 samples"
-        assert 'Au' in df.columns, "Missing Au column"
-        assert 'lithology' in df.columns, "Missing lithology column"
+        if not len(df) == 250:
+            raise ValueError("Expected 250 samples")
+        if not 'Au' in df.columns:
+            raise ValueError("Missing Au column")
+        if not 'lithology' in df.columns:
+            raise ValueError("Missing lithology column")
         logger.info("✓ Data fetching successful\n")
         
         # Test 2: Spatial feature preparation
         logger.info("TEST 2: Preparing spatial features...")
         gdf = prepare_spatial_features(df)
-        assert 'x' in gdf.columns, "Missing x coordinate"
-        assert 'y' in gdf.columns, "Missing y coordinate"
-        assert 'log_Au' in gdf.columns, "Missing log_Au"
+        if not 'x' in gdf.columns:
+            raise ValueError("Missing x coordinate")
+        if not 'y' in gdf.columns:
+            raise ValueError("Missing y coordinate")
+        if not 'log_Au' in gdf.columns:
+            raise ValueError("Missing log_Au")
         logger.info("✓ Spatial features prepared\n")
         
         # Test 3: Spatial folds
         logger.info("TEST 3: Creating spatial cross-validation folds...")
         groups = create_spatial_folds(gdf)
-        assert len(groups) == len(gdf), "Groups length mismatch"
-        assert len(np.unique(groups)) >= 4, "Expected at least 4 folds"
+        if not len(groups) == len(gdf):
+            raise ValueError("Groups length mismatch")
+        if not len(np.unique(groups)) >= 4:
+            raise ValueError("Expected at least 4 folds")
         logger.info("✓ Spatial folds created\n")
         
         # Test 4: Variogram fitting
         logger.info("TEST 4: Fitting variogram...")
         V = fit_variogram(gdf)
-        assert V.sill > 0, "Sill should be positive"
-        assert V.range > 0, "Range should be positive"
+        if not V.sill > 0:
+            raise ValueError("Sill should be positive")
+        if not V.range > 0:
+            raise ValueError("Range should be positive")
         logger.info("✓ Variogram fitted\n")
         
         # Test 5: Ordinary Kriging
         logger.info("TEST 5: Performing Ordinary Kriging...")
         gx, gy, ok_ppm, ok_var = ordinary_kriging_predict(gdf, grid_resolution=50)
-        assert ok_ppm.shape == (50, 50), "Unexpected grid shape"
-        assert ok_ppm.min() >= 0, "Negative predictions found"
+        if not ok_ppm.shape == (50, 50):
+            raise ValueError("Unexpected grid shape")
+        if not ok_ppm.min() >= 0:
+            raise ValueError("Negative predictions found")
         logger.info("✓ Ordinary Kriging completed\n")
         
         # Test 6: Gaussian Process
         logger.info("TEST 6: Training Gaussian Process Regressor...")
         gp_model, gp_pred, gp_std, gpr_metrics = train_gaussian_process(gdf, groups)
-        assert len(gp_pred) == len(gdf), "Prediction length mismatch"
-        assert len(gp_std) == len(gdf), "Std length mismatch"
-        assert gpr_metrics['mae'] > 0, "Invalid MAE"
-        assert 0.8 <= gpr_metrics['coverage'] <= 1.0, "Coverage out of range"
+        if not len(gp_pred) == len(gdf):
+            raise ValueError("Prediction length mismatch")
+        if not len(gp_std) == len(gdf):
+            raise ValueError("Std length mismatch")
+        if not gpr_metrics['mae'] > 0:
+            raise ValueError("Invalid MAE")
+        if not 0.8 <= gpr_metrics['coverage'] <= 1.0:
+            raise ValueError("Coverage out of range")
         logger.info("✓ Gaussian Process trained\n")
         
         # Test 7: XGBoost
         logger.info("TEST 7: Training XGBoost...")
         xgb_model, xgb_pred, xgb_metrics = train_xgboost(gdf, groups)
-        assert len(xgb_pred) == len(gdf), "Prediction length mismatch"
-        assert xgb_metrics['mae'] > 0, "Invalid MAE"
+        if not len(xgb_pred) == len(gdf):
+            raise ValueError("Prediction length mismatch")
+        if not xgb_metrics['mae'] > 0:
+            raise ValueError("Invalid MAE")
         logger.info("✓ XGBoost trained\n")
         
         # Test 8: Grid predictions
         logger.info("TEST 8: Creating prediction grid...")
         grid_results = create_prediction_grid(gdf, gp_model, xgb_model, resolution=50)
-        assert 'gp_mean' in grid_results, "Missing GPR mean"
-        assert 'gp_std' in grid_results, "Missing GPR std"
-        assert 'xgb_pred' in grid_results, "Missing XGB predictions"
-        assert grid_results['gp_mean'].shape == (50, 50), "Grid shape mismatch"
+        if not 'gp_mean' in grid_results:
+            raise ValueError("Missing GPR mean")
+        if not 'gp_std' in grid_results:
+            raise ValueError("Missing GPR std")
+        if not 'xgb_pred' in grid_results:
+            raise ValueError("Missing XGB predictions")
+        if not grid_results['gp_mean'].shape == (50, 50):
+            raise ValueError("Grid shape mismatch")
         logger.info("✓ Prediction grid created\n")
         
         # Test 9: Calibration analysis
@@ -109,9 +131,12 @@ def main():
         calib_df = analyze_uncertainty_calibration(
             gdf["log_Au"].values, gp_pred, gp_std, n_bins=5
         )
-        assert len(calib_df) >= 4, "Expected at least 4 calibration bins"
-        assert 'predicted_std' in calib_df.columns, "Missing predicted_std"
-        assert 'actual_rmse' in calib_df.columns, "Missing actual_rmse"
+        if not len(calib_df) >= 4:
+            raise ValueError("Expected at least 4 calibration bins")
+        if not 'predicted_std' in calib_df.columns:
+            raise ValueError("Missing predicted_std")
+        if not 'actual_rmse' in calib_df.columns:
+            raise ValueError("Missing actual_rmse")
         logger.info("✓ Calibration analysis completed\n")
         
         # Test 10: Method comparison
@@ -137,7 +162,7 @@ def main():
         return True
         
     except Exception as e:
-        logger.error(f"\n❌ VALIDATION FAILED: {str(e)}")
+        logger.error(f"\n❌ VALIDATION FAILED: {str(e, exc_info=True)}")
         import traceback
         traceback.print_exc()
         return False
