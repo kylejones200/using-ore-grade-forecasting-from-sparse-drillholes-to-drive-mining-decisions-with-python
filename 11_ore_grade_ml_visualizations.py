@@ -20,12 +20,10 @@ from sklearn.gaussian_process import GaussianProcessRegressor
 from sklearn.gaussian_process.kernels import RBF, WhiteKernel
 from sklearn.ensemble import GradientBoostingRegressor
 from sklearn.model_selection import train_test_split
-import warnings
 
 
 
 from pathlib import Path
-warnings.filterwarnings('ignore')
 
 def apply_minimalist_style_manual(ax):
     """Apply minimalist style components manually to axis."""
