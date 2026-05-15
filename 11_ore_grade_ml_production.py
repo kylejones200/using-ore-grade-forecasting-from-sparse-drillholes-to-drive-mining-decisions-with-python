@@ -28,8 +28,6 @@ logging.basicConfig(
     format='%(asctime)s - %(levelname)s - %(message)s'
 )
 logger = logging.getLogger(__name__)
-import sys
-from pathlib import Path
 def fetch_geochemical_data(region_bounds=None):
     """
     Fetch geochemical data from Geoscience Australia.
@@ -292,7 +290,7 @@ def train_gaussian_process(gdf, groups):
     z_scores = np.abs(y - pred_mu) / np.maximum(pred_std, 1e-6)
     coverage_95 = (z_scores < 1.96).mean()
     
-    logger.info(f"\nGPR Overall Performance:")
+    logger.info("\nGPR Overall Performance:")
     logger.info(f"  MAE: {mae:.3f} log(ppm)")
     logger.info(f"  RMSE: {rmse:.3f} log(ppm)")
     logger.info(f"  95% Confidence Coverage: {coverage_95:.1%}")
@@ -363,7 +361,7 @@ def train_xgboost(gdf, groups):
     mae = mean_absolute_error(y, pred)
     rmse = np.sqrt(mean_squared_error(y, pred))
     
-    logger.info(f"\nXGBoost Overall Performance:")
+    logger.info("\nXGBoost Overall Performance:")
     logger.info(f"  MAE: {mae:.3f} log(ppm)")
     logger.info(f"  RMSE: {rmse:.3f} log(ppm)")
     
@@ -429,7 +427,7 @@ def create_prediction_grid(gdf, gp_model, xgb_model, resolution=150):
     # Ordinary Kriging (from earlier)
     gx_1d, gy_1d, ok_ppm, ok_var = ordinary_kriging_predict(gdf, grid_resolution=resolution)
     
-    logger.info(f"\nGrid Predictions Complete:")
+    logger.info("\nGrid Predictions Complete:")
     logger.info(f"  GPR Au range: {gp_ppm.min():.3f} - {gp_ppm.max():.3f} ppm")
     logger.info(f"  XGB Au range: {xgb_ppm.min():.3f} - {xgb_ppm.max():.3f} ppm")
     logger.info(f"  OK Au range: {ok_ppm.min():.3f} - {ok_ppm.max():.3f} ppm")
@@ -482,19 +480,19 @@ def compare_methods(ok_metrics, gpr_metrics, xgb_metrics):
     logger.info("=== MODEL COMPARISON SUMMARY ===")
     
     logger.info("\nAccuracy Metrics:")
-    logger.info(f"  Ordinary Kriging:    MAE = N/A (no CV), RMSE = N/A")
+    logger.info("  Ordinary Kriging:    MAE = N/A (no CV), RMSE = N/A")
     logger.info(f"  Gaussian Process:    MAE = {gpr_metrics['mae']:.3f}, RMSE = {gpr_metrics['rmse']:.3f}")
     logger.info(f"  XGBoost:             MAE = {xgb_metrics['mae']:.3f}, RMSE = {xgb_metrics['rmse']:.3f}")
     
     logger.info("\nUncertainty Quantification:")
-    logger.info(f"  Ordinary Kriging:    Kriging variance (but often overconfident)")
+    logger.info("  Ordinary Kriging:    Kriging variance (but often overconfident)")
     logger.info(f"  Gaussian Process:    95% Coverage = {gpr_metrics['coverage']:.1%} (well-calibrated)")
-    logger.info(f"  XGBoost:             None (point estimates only)")
+    logger.info("  XGBoost:             None (point estimates only)")
     
     logger.info("\nComputational Efficiency:")
-    logger.info(f"  Ordinary Kriging:    O(n³) - slow for large datasets")
-    logger.info(f"  Gaussian Process:    O(n³) - same limitations")
-    logger.info(f"  XGBoost:             O(n log n) - scales to millions of points")
+    logger.info("  Ordinary Kriging:    O(n³) - slow for large datasets")
+    logger.info("  Gaussian Process:    O(n³) - same limitations")
+    logger.info("  XGBoost:             O(n log n) - scales to millions of points")
     
     logger.info("\nBest Use Cases:")
     logger.info("  Ordinary Kriging:    Traditional geostatistics, spatial-only data")
@@ -513,7 +511,7 @@ def main():
     groups = create_spatial_folds(gdf)
     
     # 2. Fit variogram and perform kriging
-    V = fit_variogram(gdf)
+    fit_variogram(gdf)
     gx, gy, ok_ppm, ok_var = ordinary_kriging_predict(gdf)
     
     # 3. Train ML models
@@ -524,7 +522,7 @@ def main():
     grid_results = create_prediction_grid(gdf, gp_model, xgb_model)
     
     # 5. Calibration analysis
-    calib_df = analyze_uncertainty_calibration(
+    analyze_uncertainty_calibration(
         gdf["log_Au"].values, gp_pred, gp_std
     )
     

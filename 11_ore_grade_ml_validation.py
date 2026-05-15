@@ -35,7 +35,6 @@ compare_methods = production_module.compare_methods
 
 import numpy as np
 
-from pathlib import Path
 def main():
     """Run validation tests for all functions."""
     logger.info("BLOG 11 VALIDATION - ORE GRADE FORECASTING WITH ML")
@@ -47,20 +46,20 @@ def main():
         df = fetch_geochemical_data()
         if not len(df) == 250:
             raise ValueError("Expected 250 samples")
-        if not 'Au' in df.columns:
+        if 'Au' not in df.columns:
             raise ValueError("Missing Au column")
-        if not 'lithology' in df.columns:
+        if 'lithology' not in df.columns:
             raise ValueError("Missing lithology column")
         logger.info("✓ Data fetching successful\n")
         
         # Test 2: Spatial feature preparation
         logger.info("TEST 2: Preparing spatial features...")
         gdf = prepare_spatial_features(df)
-        if not 'x' in gdf.columns:
+        if 'x' not in gdf.columns:
             raise ValueError("Missing x coordinate")
-        if not 'y' in gdf.columns:
+        if 'y' not in gdf.columns:
             raise ValueError("Missing y coordinate")
-        if not 'log_Au' in gdf.columns:
+        if 'log_Au' not in gdf.columns:
             raise ValueError("Missing log_Au")
         logger.info("✓ Spatial features prepared\n")
         
@@ -116,11 +115,11 @@ def main():
         # Test 8: Grid predictions
         logger.info("TEST 8: Creating prediction grid...")
         grid_results = create_prediction_grid(gdf, gp_model, xgb_model, resolution=50)
-        if not 'gp_mean' in grid_results:
+        if 'gp_mean' not in grid_results:
             raise ValueError("Missing GPR mean")
-        if not 'gp_std' in grid_results:
+        if 'gp_std' not in grid_results:
             raise ValueError("Missing GPR std")
-        if not 'xgb_pred' in grid_results:
+        if 'xgb_pred' not in grid_results:
             raise ValueError("Missing XGB predictions")
         if not grid_results['gp_mean'].shape == (50, 50):
             raise ValueError("Grid shape mismatch")
@@ -133,9 +132,9 @@ def main():
         )
         if not len(calib_df) >= 4:
             raise ValueError("Expected at least 4 calibration bins")
-        if not 'predicted_std' in calib_df.columns:
+        if 'predicted_std' not in calib_df.columns:
             raise ValueError("Missing predicted_std")
-        if not 'actual_rmse' in calib_df.columns:
+        if 'actual_rmse' not in calib_df.columns:
             raise ValueError("Missing actual_rmse")
         logger.info("✓ Calibration analysis completed\n")
         

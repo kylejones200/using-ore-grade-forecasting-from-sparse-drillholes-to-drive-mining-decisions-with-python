@@ -1,6 +1,4 @@
 import signalplot
-import sys
-import os
 
 import logging
 logging.basicConfig(
@@ -23,7 +21,6 @@ from sklearn.model_selection import train_test_split
 
 
 
-from pathlib import Path
 
 def apply_minimalist_style_manual(ax):
     """Apply minimalist style components manually to axis."""
@@ -120,7 +117,7 @@ def create_main_spatial_prediction_plot(plot: bool = False):
             contour = ax.contourf(grid_X, grid_Y, pred, levels=15, cmap='gray', alpha=0.8)
         
         # Overlay drill holes
-            scatter = ax.scatter(X_train[:, 0], X_train[:, 1], c=y_train, 
+            ax.scatter(X_train[:, 0], X_train[:, 1], c=y_train, 
                                s=30, cmap='gray', edgecolors='white', linewidth=0.5,
                                vmin=pred.min(), vmax=pred.max(), zorder=10)
         
@@ -227,7 +224,7 @@ def create_model_comparison_plot(plot: bool = False):
                     dpi=300, bbox_inches='tight')
         plt.close()
     
-    logger.info(f"✓ Model comparison visualization saved")
+    logger.info("✓ Model comparison visualization saved")
     logger.info(f"  Kriging MAE: {kriging_mae:.3f}, R²: {kriging_r2:.3f}")
     logger.info(f"  GP MAE: {gp_mae:.3f}, R²: {gp_r2:.3f}")
     logger.info(f"  GBT MAE: {gbt_mae:.3f}, R²: {gbt_r2:.3f}")

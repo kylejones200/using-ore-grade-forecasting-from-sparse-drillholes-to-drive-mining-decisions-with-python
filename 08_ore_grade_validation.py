@@ -301,7 +301,7 @@ def main():
     
     logger.info("\n5. Testing conditional simulation...")
     simulations = conditional_simulation(drillholes, gp_model, n_realizations=10)
-    logger.info(f"   ✓ Realizations Generated: 10")
+    logger.info("   ✓ Realizations Generated: 10")
     logger.info(f"   ✓ Blocks per Realization: {len(simulations['mean_grade']):,}")
     logger.info(f"   ✓ Global P50: {simulations['global_p50']:.3f} ppm Au")
     

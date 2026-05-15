@@ -1,7 +1,5 @@
 #!/usr/bin/env python3
 import signalplot
-import sys
-import os
 
 import logging
 logging.basicConfig(
@@ -271,7 +269,7 @@ def create_accuracy_visualization(plot: bool = False):
         stats_text = f'R² = {r2:.3f}\nMAE = {mae:.3f} ppm'
         ax1.text(0.05, 0.95, stats_text, transform=ax1.transAxes,
                 fontsize=10, verticalalignment='top',
-                bbox=dict(boxstyle='round', facecolor='white', edgecolor='black', linewidth=1))
+                bbox={'boxstyle': 'round', 'facecolor': 'white', 'edgecolor': 'black', 'linewidth': 1})
     
     # Apply minimalist style
         ax1.spines["top"].set_visible(False)
@@ -309,7 +307,7 @@ def create_accuracy_visualization(plot: bool = False):
         stats_text = f'Mean = {mean_residual:.3f} ppm\nStd Dev = {std_residual:.3f} ppm'
         ax2.text(0.95, 0.95, stats_text, transform=ax2.transAxes,
                 fontsize=10, verticalalignment='top', horizontalalignment='right',
-                bbox=dict(boxstyle='round', facecolor='white', edgecolor='black', linewidth=1))
+                bbox={'boxstyle': 'round', 'facecolor': 'white', 'edgecolor': 'black', 'linewidth': 1})
     
     # Apply minimalist style
         ax2.spines["top"].set_visible(False)
