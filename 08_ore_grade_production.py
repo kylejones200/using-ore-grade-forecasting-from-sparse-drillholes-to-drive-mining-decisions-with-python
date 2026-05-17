@@ -70,8 +70,8 @@ def calculate_experimental_variogram(data, max_distance=500, n_bins=20):
             dist = np.linalg.norm(coords[i] - coords[j])
             if dist <= max_distance:
                 semivar = 0.5 * (grades[i] - grades[j]) ** 2
-                pd.concat([distances, dist])
-                pd.concat([semivariances, semivar])
+                distances.append(dist)
+                semivariances.append(semivar)
 
     distances = np.array(distances)
     semivariances = np.array(semivariances)
