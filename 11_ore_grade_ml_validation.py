@@ -15,7 +15,7 @@ logger = logging.getLogger(__name__)
 # Import module with numeric prefix
 spec = importlib.util.spec_from_file_location(
     "ore_grade_ml_production",
-    "/Users/k.jones/Desktop/blogs/blog_posts/11_ore_grade_ml_production.py",
+    "outputs/11_ore_grade_ml_production.py",
 )
 production_module = importlib.util.module_from_spec(spec)
 spec.loader.exec_module(production_module)

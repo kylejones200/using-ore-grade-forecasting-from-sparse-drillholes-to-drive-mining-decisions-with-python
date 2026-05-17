@@ -157,7 +157,7 @@ def create_main_spatial_prediction_plot(plot: bool = False):
 
         plt.tight_layout()
         plt.savefig(
-            "/Users/k.jones/Desktop/blogs/blog_posts/11_ore_grade_ml_main.png",
+            "outputs/11_ore_grade_ml_main.png",
             dpi=300,
             bbox_inches="tight",
         )
@@ -283,7 +283,7 @@ def create_model_comparison_plot(plot: bool = False):
 
         plt.tight_layout(rect=[0, 0.05, 1, 1])
         plt.savefig(
-            "/Users/k.jones/Desktop/blogs/blog_posts/11_ore_grade_ml_comparison.png",
+            "outputs/11_ore_grade_ml_comparison.png",
             dpi=300,
             bbox_inches="tight",
         )
