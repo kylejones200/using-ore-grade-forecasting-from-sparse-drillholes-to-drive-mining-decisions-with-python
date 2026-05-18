@@ -2,4 +2,9 @@
 name = "using-ore-grade-forecasting-from-sparse-drillholes"
 version = "0.1.0"
 requires-python = ">=3.12"
-dependencies = []
+dependencies = [
+    "pydantic>=2.10.0",]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+pythonpath = ["."]

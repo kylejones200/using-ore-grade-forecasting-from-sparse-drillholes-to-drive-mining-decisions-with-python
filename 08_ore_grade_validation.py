@@ -22,24 +22,18 @@ logger = logging.getLogger(__name__)
 def generate_synthetic_drillhole_data(num_holes=100, domain_size=1000, seed=42):
     """Generate realistic synthetic drillhole assay data."""
     np.random.seed(seed)
-
     x = np.random.uniform(0, domain_size, num_holes)
     y = np.random.uniform(0, domain_size, num_holes)
     z = np.random.uniform(-200, -50, num_holes)
-
     correlation_range = 150
     log_background = np.random.normal(-2, 0.5, num_holes)
-
     coords = np.column_stack([x, y, z])
     distances = cdist(coords, coords)
     correlation_matrix = np.exp(-((distances / correlation_range) ** 2))
-
     cholesky = np.linalg.cholesky(correlation_matrix + np.eye(num_holes) * 0.01)
     correlated_field = cholesky @ np.random.normal(0, 1, num_holes)
-
     log_grade = log_background + 0.8 * correlated_field
     grade_au_ppm = np.exp(log_grade)
-
     n_shoots = 3
     for _ in range(n_shoots):
         shoot_center = np.random.randint(0, num_holes)
@@ -57,7 +51,6 @@ def generate_synthetic_drillhole_data(num_holes=100, domain_size=1000, seed=42):
             "log_au_ppm": np.log(grade_au_ppm + 0.001),
         }
     )
-
     return drillholes
 
 
@@ -65,11 +58,9 @@ def calculate_experimental_variogram(data, max_distance=500, n_bins=20):
     """Calculate experimental variogram to quantify spatial continuity."""
     coords = data[["x", "y", "z"]].values
     grades = data["log_au_ppm"].values
-
     n_samples = len(data)
     distances = []
     semivariances = []
-
     for i in range(n_samples):
         for j in range(i + 1, n_samples):
             dist = np.linalg.norm(coords[i] - coords[j])
@@ -80,12 +71,10 @@ def calculate_experimental_variogram(data, max_distance=500, n_bins=20):
 
     distances = np.array(distances)
     semivariances = np.array(semivariances)
-
     bins = np.linspace(0, max_distance, n_bins + 1)
     bin_centers = (bins[:-1] + bins[1:]) / 2
     binned_semivariance = []
     bin_counts = []
-
     for i in range(n_bins):
         mask = (distances >= bins[i]) & (distances < bins[i + 1])
         if mask.sum() > 0:
@@ -96,11 +85,9 @@ def calculate_experimental_variogram(data, max_distance=500, n_bins=20):
             bin_counts.append(0)
 
     binned_semivariance = np.array(binned_semivariance)
-
     valid_mask = ~np.isnan(binned_semivariance) & (np.array(bin_counts) >= 10)
     valid_distances = bin_centers[valid_mask]
     valid_semivar = binned_semivariance[valid_mask]
-
     # Pythonic variogram fitting
     if len(valid_semivar) >= 3:
         nugget = min(valid_semivar[0], valid_semivar[-1])
@@ -125,11 +112,9 @@ def build_gp_grade_model(training_data, kernel_params=None):
     """Build Gaussian Process model for grade estimation."""
     X = training_data[["x", "y", "z"]].values
     y = training_data["log_au_ppm"].values
-
     X_mean = X.mean(axis=0)
     X_std = X.std(axis=0)
     X_normalized = (X - X_mean) / X_std
-
     if kernel_params is None:
         length_scale = 1.0
         signal_variance = 1.0
@@ -142,20 +127,15 @@ def build_gp_grade_model(training_data, kernel_params=None):
     kernel = ConstantKernel(signal_variance, (0.1, 10.0)) * RBF(
         length_scale=length_scale, length_scale_bounds=(0.1, 5.0)
     ) + WhiteKernel(noise_level=noise_variance, noise_level_bounds=(0.01, 1.0))
-
     gp = GaussianProcessRegressor(
         kernel=kernel, n_restarts_optimizer=10, alpha=1e-6, normalize_y=True
     )
-
     gp.fit(X_normalized, y)
-
     cv_scores = cross_val_score(gp, X_normalized, y, cv=5, scoring="r2")
     cv_predictions = cross_val_predict(gp, X_normalized, y, cv=5)
-
     mae = np.mean(np.abs(y - cv_predictions))
     rmse = np.sqrt(np.mean((y - cv_predictions) ** 2))
     r2 = cv_scores.mean()
-
     return {
         "model": gp,
         "X_mean": X_mean,
@@ -182,23 +162,17 @@ def estimate_block_model(drillhole_data, gp_model, block_size=25, domain_extent=
     x_blocks = np.arange(x_min, x_max, block_size)
     y_blocks = np.arange(y_min, y_max, block_size)
     z_blocks = np.arange(z_min, z_max, block_size)
-
     xx, yy, zz = np.meshgrid(x_blocks, y_blocks, z_blocks, indexing="ij")
     block_coords = np.column_stack([xx.ravel(), yy.ravel(), zz.ravel()])
-
     block_coords_normalized = (block_coords - gp_model["X_mean"]) / gp_model["X_std"]
-
     mean_pred, std_pred = gp_model["model"].predict(
         block_coords_normalized, return_std=True
     )
-
     grade_mean = np.exp(mean_pred + std_pred**2 / 2)
     grade_std = grade_mean * np.sqrt(np.exp(std_pred**2) - 1)
-
     grade_p10 = np.exp(mean_pred - 1.28 * std_pred)
     grade_p50 = np.exp(mean_pred)
     grade_p90 = np.exp(mean_pred + 1.28 * std_pred)
-
     # Pythonic classification with pd.cut
     coefficient_of_variation = std_pred / np.abs(mean_pred)
     classification = pd.cut(
@@ -206,7 +180,6 @@ def estimate_block_model(drillhole_data, gp_model, block_size=25, domain_extent=
         bins=[0, 0.3, 0.6, np.inf],
         labels=["Measured", "Indicated", "Inferred"],
     )
-
     block_model = pd.DataFrame(
         {
             "x": block_coords[:, 0],
@@ -222,7 +195,6 @@ def estimate_block_model(drillhole_data, gp_model, block_size=25, domain_extent=
             "block_volume_m3": block_size**3,
         }
     )
-
     return block_model
 
 
@@ -231,14 +203,10 @@ def conditional_simulation(drillhole_data, gp_model, block_size=25, n_realizatio
     x_blocks = np.arange(200, 800, block_size)
     y_blocks = np.arange(200, 800, block_size)
     z_blocks = np.arange(-150, -100, block_size)
-
     xx, yy, zz = np.meshgrid(x_blocks, y_blocks, z_blocks, indexing="ij")
     block_coords = np.column_stack([xx.ravel(), yy.ravel(), zz.ravel()])
-
     block_coords_norm = (block_coords - gp_model["X_mean"]) / gp_model["X_std"]
-
     realizations = []
-
     for i in range(n_realizations):
         sample = gp_model["model"].sample_y(
             block_coords_norm, n_samples=1, random_state=i
@@ -247,17 +215,14 @@ def conditional_simulation(drillhole_data, gp_model, block_size=25, n_realizatio
         realizations.append(grade_realization)
 
     realizations = np.array(realizations)
-
     mean_grade = realizations.mean(axis=0)
     std_grade = realizations.std(axis=0)
     p10_grade = np.percentile(realizations, 10, axis=0)
     p90_grade = np.percentile(realizations, 90, axis=0)
-
     global_means = realizations.mean(axis=1)
     global_p10 = np.percentile(global_means, 10)
     global_p50 = np.percentile(global_means, 50)
     global_p90 = np.percentile(global_means, 90)
-
     return {
         "realizations": realizations,
         "block_coords": block_coords,
@@ -274,9 +239,7 @@ def conditional_simulation(drillhole_data, gp_model, block_size=25, n_realizatio
 def main():
     """Run validation tests."""
     logger.info("ORE GRADE FORECASTING - CODE VALIDATION")
-
     np.random.seed(42)
-
     logger.info("\n1. Testing drillhole data generation...")
     drillholes = generate_synthetic_drillhole_data(num_holes=120)
     logger.info(f"   ✓ Generated {len(drillholes)} drillhole samples")
@@ -284,43 +247,35 @@ def main():
         f"   ✓ Grade range: {drillholes['au_ppm'].min():.3f} to {drillholes['au_ppm'].max():.2f} ppm Au"
     )
     logger.info(f"   ✓ Mean grade: {drillholes['au_ppm'].mean():.3f} ppm Au")
-
     logger.info("\n2. Testing variogram analysis...")
     variogram = calculate_experimental_variogram(drillholes)
     logger.info(f"   ✓ Nugget Effect: {variogram['nugget']:.3f}")
     logger.info(f"   ✓ Sill: {variogram['sill']:.3f}")
     logger.info(f"   ✓ Range: {variogram['range']:.1f} meters")
-
     logger.info("\n3. Testing Gaussian Process model...")
     gp_model = build_gp_grade_model(drillholes)
     logger.info(f"   ✓ Cross-Validated R²: {gp_model['cv_r2']:.3f}")
     logger.info(f"   ✓ MAE: {gp_model['cv_mae']:.3f} log(ppm)")
     logger.info(f"   ✓ RMSE: {gp_model['cv_rmse']:.3f} log(ppm)")
-
     logger.info("\n4. Testing block model estimation...")
     block_model = estimate_block_model(drillholes, gp_model, block_size=50)
     density_t_m3 = 2.7
     block_model["tonnage"] = block_model["block_volume_m3"] * density_t_m3
-
     cutoff_grade = 0.5
     ore_blocks = block_model[block_model["au_ppm_mean"] >= cutoff_grade]
-
     total_ore_tonnes = ore_blocks["tonnage"].sum()
     total_contained_gold = (ore_blocks["tonnage"] * ore_blocks["au_ppm_mean"]).sum()
     average_ore_grade = (
         total_contained_gold / total_ore_tonnes if total_ore_tonnes > 0 else 0
     )
-
     logger.info(f"   ✓ Total Blocks: {len(block_model):,}")
     logger.info(f"   ✓ Ore Blocks: {len(ore_blocks):,}")
     logger.info(f"   ✓ Average Ore Grade: {average_ore_grade:.3f} ppm Au")
-
     logger.info("\n5. Testing conditional simulation...")
     simulations = conditional_simulation(drillholes, gp_model, n_realizations=10)
     logger.info("   ✓ Realizations Generated: 10")
     logger.info(f"   ✓ Blocks per Realization: {len(simulations['mean_grade']):,}")
     logger.info(f"   ✓ Global P50: {simulations['global_p50']:.3f} ppm Au")
-
     logger.info("=== ALL TESTS PASSED! ✓ ===")
 
 
